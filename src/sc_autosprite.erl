@@ -22,12 +22,12 @@ layout(Sizes) ->
 
     if MasterLength =/= CheckLength -> throw({ error, "All layout sizes must be {X,Y} positive integer pixel sizes" }); true -> ok end,
 
-    Areas                      = [ X*Y || {_Name,X,Y} <- Sizes ],
-    SumArea                    = lists:sum(Areas),
+    Areas                       = [ X*Y || {_Name,X,Y} <- Sizes ],
+    SumArea                     = lists:sum(Areas),
     
-    { Names, Widths, Heights } = lists:unzip3(Sizes),
-    { MinWidth, MaxWidth }     = sc:extrema(Widths),
-    { MinHeight, MaxHeight }   = sc:extrema(Heights),
+    { _Names, Widths, Heights } = lists:unzip3(Sizes),
+    { MinWidth, MaxWidth }      = sc:extrema(Widths),
+    { MinHeight, MaxHeight }    = sc:extrema(Heights),
 
     WP = width_pack(MaxWidth, Sizes),
 
@@ -39,7 +39,7 @@ layout(Sizes) ->
 
 width_pack(MaxWidth, Sizes) ->
 
-    WAreas = lists:keysort(2, Sizes),
+    WAreas = lists:reverse(lists:keysort(2, Sizes)),
 
     [seq_pack(MaxWidth, WAreas), MaxWidth].
 
@@ -65,4 +65,5 @@ seq_pack(_Width, [], Layout, _AtHeight) ->
 
 seq_pack(Width, [ThisSize|RemSizes], Layout, AtHeight) ->
 
-    seq_pack(Width, RemSizes, [ThisSize]++Layout).
+    {_Name,_X,Y} = ThisSize,
+    seq_pack(Width, RemSizes, [{ThisSize,{0,AtHeight}}]++Layout, AtHeight+Y).
